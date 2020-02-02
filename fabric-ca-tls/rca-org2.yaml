@@ -1,0 +1,23 @@
+version: '2'
+
+networks:
+  fabric-ca:
+    driver: bridge
+
+services:
+  rca-org2:
+    container_name: rca-org2
+    image: hyperledger/fabric-ca:1.4.0
+    command: sh -c 'fabric-ca-server start -d -b rca-org2-admin:rca-org2-adminpw --port 7055'
+    environment:
+    - FABRIC_CA_SERVER_HOME=/tmp/hyperledger/fabric-ca/crypto
+    - FABRIC_CA_SERVER_TLS_ENABLED=true
+    - FABRIC_CA_SERVER_CSR_CN=rca-org2
+    - FABRIC_CA_SERVER_CSR_HOSTS=0.0.0.0
+    - FABRIC_CA_SERVER_DEBUG=true
+    volumes:
+    - /tmp/hyperledger/org2/ca:/tmp/hyperledger/fabric-ca
+    networks:
+    - fabric-ca
+    ports:
+    - 7055:7055

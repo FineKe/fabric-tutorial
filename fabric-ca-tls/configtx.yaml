@@ -1,0 +1,152 @@
+# Copyright IBM Corp. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+---
+
+Organizations:
+- &OrdererOrg
+  Name: OrdererOrg
+  ID: OrdererMSP
+  MSPDir: ./orderer/msp
+  Policies:
+    Readers:
+      Type: Signature
+      Rule: "OR('OrdererMSP.member')"
+    Writers:
+      Type: Signature
+      Rule: "OR('OrdererMSP.member')"
+    Admins:
+      Type: Signature
+      Rule: "OR('OrdererMSP.admin')"
+
+- &org1
+  Name: org1MSP
+  ID: org1MSP
+  MSPDir: ./org1/msp
+  Policies:
+    Readers:
+      Type: Signature
+      Rule: "OR('org1MSP.admin', 'org1MSP.peer', 'org1MSP.client')"
+    Writers:
+      Type: Signature
+      Rule: "OR('org1MSP.admin', 'org1MSP.client')"
+    Admins:
+      Type: Signature
+      Rule: "OR('org1MSP.admin')"
+
+  AnchorPeers:
+  - Host: peer1-org1
+    Port: 7051
+- &org2
+  Name: org2MSP
+  ID: org2MSP
+  MSPDir: ./org2/msp
+  Policies:
+    Readers:
+      Type: Signature
+      Rule: "OR('org2MSP.admin', 'org2MSP.peer', 'org2MSP.client')"
+    Writers:
+      Type: Signature
+      Rule: "OR('org2MSP.admin', 'org2MSP.client')"
+    Admins:
+      Type: Signature
+      Rule: "OR('org2MSP.admin')"
+
+  AnchorPeers:
+  - Host: peer1-org2
+    Port: 7051
+Capabilities:
+    Global: &ChannelCapabilities
+        V1_3: true
+    Orderer: &OrdererCapabilities
+        V1_1: true
+    Application: &ApplicationCapabilities
+        V1_3: true
+        V1_2: false
+        V1_1: false
+Application: &ApplicationDefaults
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+          <<: *ApplicationCapabilities
+Orderer: &OrdererDefaults
+    OrdererType: solo
+    Addresses:
+        - orderer1-orderer:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+
+    Kafka:
+        Brokers:
+            - 1kafka0:8013
+            - 1kafka1:8014
+            - 1kafka2:8015
+            - 1kafka3:8016
+    Organizations:
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+    Capabilities:
+          <<: *OrdererCapabilities
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: "ImplicitMeta"
+            Rule: "MAJORITY Admins"
+    Capabilities:
+          <<: *ChannelCapabilities
+Profiles:
+    OrgsOrdererGenesis:
+        <<: *ChannelDefaults
+        Orderer:
+            <<: *OrdererDefaults
+            Organizations:
+                - *OrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Consortiums:
+            SampleConsortium:
+                Organizations:
+                    - *org1
+                    - *org2
+    OrgsChannel:
+        Consortium: SampleConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *org1
+                - *org2
+            Capabilities:
+                <<: *ApplicationCapabilities

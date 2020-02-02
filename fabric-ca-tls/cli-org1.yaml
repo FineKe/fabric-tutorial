@@ -1,0 +1,29 @@
+version: '2'
+networks:
+  fabric-ca:
+    driver: bridge
+
+services:
+  cli-org1:
+   container_name: cli-org1
+   image: hyperledger/fabric-tools
+   tty: true
+   stdin_open: true
+   environment:
+   - GOPATH=/opt/gopath
+   - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+   - FABRIC_LOGGING_SPEC=DEBUG
+   - CORE_PEER_ID=cli-org1
+   - CORE_PEER_ADDRESS=peer1-org1:7051
+   - CORE_PEER_LOCALMSPID=org1MSP
+   - CORE_PEER_TLS_ENABLED=true
+   - CORE_PEER_TLS_ROOTCERT_FILE=/tmp/hyperledger/org1/peer1/tls-msp/tlscacerts/tls-0-0-0-0-7052.pem
+   - CORE_PEER_MSPCONFIGPATH=/tmp/hyperledger/org1/peer1/msp
+   working_dir: /opt/gopath/src/github.com/hyperledger/fabric/org1
+   command: sh
+   volumes:
+   - /Users/finefine/fabric-ca-tls/org1/peer1:/tmp/hyperledger/org1/peer1
+   - /Users/finefine/fabric-ca-tls/chaincode:/opt/gopath/src/github.com/hyperledger/fabric-samples/chaincode
+   - /Users/finefine/fabric-ca-tls/org1/admin:/tmp/hyperledger/org1/admin
+   networks:
+     - fabric-ca

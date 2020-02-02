@@ -1,0 +1,27 @@
+version: '2'
+networks:
+  fabric-ca:
+    driver: bridge
+
+services:
+  orderer1-org0:
+    container_name: orderer1-orderer
+    image: hyperledger/fabric-orderer
+    environment:
+    - ORDERER_HOME=/tmp/hyperledger/orderer:1.4.0
+    - ORDERER_HOST=orderer1-orderer
+    - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+    - ORDERER_GENERAL_GENESISMETHOD=file
+    - ORDERER_GENERAL_GENESISFILE=/tmp/hyperledger/orderer/orderer/genesis.block
+    - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+    - ORDERER_GENERAL_LOCALMSPDIR=/tmp/hyperledger/orderer/orderer/msp
+    - ORDERER_GENERAL_TLS_ENABLED=true
+    - ORDERER_GENERAL_TLS_CERTIFICATE=/tmp/hyperledger/orderer/orderer/tls-msp/signcerts/cert.pem
+    - ORDERER_GENERAL_TLS_PRIVATEKEY=/tmp/hyperledger/orderer/orderer/tls-msp/keystore/key.pem
+    - ORDERER_GENERAL_TLS_ROOTCAS=[/tmp/hyperledger/orderer/orderer/tls-msp/tlscacerts/tls-0-0-0-0-7052.pem]
+    - ORDERER_GENERAL_LOGLEVEL=debug
+    - ORDERER_DEBUG_BROADCASTTRACEDIR=data/logs
+    volumes:
+    - /Users/finefine/fabric-ca-tls/orderer/orderer1:/tmp/hyperledger/orderer/orderer/
+    networks:
+    - fabric-ca
